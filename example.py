@@ -49,6 +49,8 @@ def generate_image_grid(
     print(torch.max(t_steps).item(), torch.min(t_steps).item()) 
 
     a = torch.zeros(num_steps, batch_size, net.img_channels, net.img_resolution, net.img_resolution)
+    score = torch.zeros(num_steps, batch_size, net.img_channels, net.img_resolution, net.img_resolution)
+    score2 = torch.zeros(num_steps, batch_size, net.img_channels, net.img_resolution, net.img_resolution)
 
 
     # Main sampling loop.
@@ -72,7 +74,7 @@ def generate_image_grid(
             d_prime = (x_next - denoised) / t_next
             x_next = x_hat + (t_next - t_hat) * (0.5 * d_cur + 0.5 * d_prime)
 
-        
+
         images = x_next 
     # Save image grid.
         print(f'Saving image grid to "{dest_path}"...')
@@ -86,10 +88,14 @@ def generate_image_grid(
       
         
         a[i, :, :, :, :] = x_next
-
+        score[i, :, :, :, :] = -d_cur
+        score2[i, :, :, :, :] = denoised
+        
 
         
     torch.save(a, 'A.pt')
+    torch.save(score, 'B.pt')
+    torch.save(score2, 'C.pt')
 
 #----------------------------------------------------------------------------
 
